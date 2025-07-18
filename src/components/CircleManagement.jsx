@@ -8,6 +8,7 @@ const CircleManagement = () => {
   const [selectedCircle, setSelectCircle] = useState(new Set());
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
   const handleClick = () => {
     setUndoStack((prev) => [...prev, circleData]);
@@ -52,7 +53,8 @@ const CircleManagement = () => {
   const handleUndo = () => {
     if (undoStack.length === 0) return;
     const lastAction = undoStack[undoStack.length - 1];
-    setUndoStack((prev) => prev.slice(0, prev.length - 1));
+    const undo = undoStack.slice(0, -1);
+    setUndoStack(undo);
     setRedoStack((prev) => [...prev, circleData]);
     setCircleData(lastAction);
   };
@@ -60,13 +62,14 @@ const CircleManagement = () => {
   const handleRedo = () => {
     if (redoStack.length === 0) return;
     const nextAction = redoStack[redoStack.length - 1];
+    const redo = redoStack.slice(0, -1);
     setUndoStack((prev) => [...prev, circleData]);
-    setRedoStack((prev) => prev.slice(0, prev.length - 1));
+    setRedoStack(redo);
     setCircleData(nextAction);
   };
 
   const handleDelete = () => {
-    setUndoStack((prev) => prev.push(circleData));
+    setUndoStack((prev) => [...prev, circleData]);
     setRedoStack([]);
     setCircleData((prev) => {
       return prev.filter((item) => !selectedCircle.has(item.label));
@@ -91,7 +94,10 @@ const CircleManagement = () => {
       setCircleData((prev) => {
         return prev?.map((item) => {
           if (item.label === label) {
-            item.count = item.count + 1;
+            return {
+              ...item,
+              count: item.count + 1,
+            };
           }
           return item;
         });
@@ -99,14 +105,39 @@ const CircleManagement = () => {
     }
   };
 
+  const handleFilter = (e) => {
+    if (e.target.value === "all") {
+      setFilteredData([]);
+    }
+    const data = circleData.filter((item) => item.color === e.target.value);
+    setFilteredData(data);
+  };
+
+  const showData = filteredData.length !== 0 ? filteredData : circleData;
+
   return (
     <div className="circle-container">
       <div className="circle-header">
-        <button onClick={handleClick}>Add</button>
-        <button onClick={handleDelete}>Remove Selected</button>
+        <select onChange={handleFilter} className="button">
+          <option value={"all"}>All Color</option>
+          {colors.map((item, index) => {
+            return (
+              <option key={index} value={item}>
+                {item}
+              </option>
+            );
+          })}
+        </select>
+        <button onClick={handleClick} className="button">
+          Add
+        </button>
+        <button onClick={handleDelete} className="button">
+          Remove Selected
+        </button>
+        {selectedCircle.size > 0 && <p>{selectedCircle.size} Selected Item</p>}
       </div>
       <div className="circle-body">
-        {circleData.map((circleItem, index) => {
+        {showData.map((circleItem, index) => {
           const color = circleItem.color;
           return (
             <div

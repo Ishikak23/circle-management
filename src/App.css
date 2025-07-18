@@ -33,6 +33,7 @@
   align-items: center;
   border-style: solid;
   color: white;
+  cursor: pointer;
 }
 
 .blue {
@@ -51,4 +52,13 @@
 .selected {
   outline: 1px solid red;
   outline-offset: 2px;
+}
+
+.button {
+  height: 40px;
+  width: fit-content;
+  border-radius: 8px;
+  border-color: lightgray;
+  background-color: white;
+  color: blue;
 }
